@@ -1,0 +1,30 @@
+---
+apiVersion: getambassador.io/v2
+kind: Filter
+metadata:
+  name: keycloak-filter
+  namespace: linkerd
+spec:
+  OAuth2:
+    authorizationURL: http://keycloak-app:8080.cluster.svc.local/auth/realms/master
+    audience: "ambassador"
+    clientID: "ambassador"
+    secret: 02da8f1b-5f4e-4a47-9b2f-30b5181d4938
+    protectedOrigins:
+    - origin: http://ambassador:80.cluster.svc.local
+---
+apiVersion: getambassador.io/v2
+kind: FilterPolicy
+metadata:
+  name: httpbin-policy
+  namespace: linkerd
+spec:
+  rules:
+    - host: linkerd.local
+      path: /*
+      public: false
+      filters:
+        - name: keycloak-filter
+          arguments:
+            scope:
+            - "roles"

@@ -1,0 +1,21 @@
+---
+apiVersion: getambassador.io/v2
+kind: Module
+metadata:
+  name: ambassador
+spec:
+  config:
+    add_linkerd_headers: true
+---
+apiVersion: getambassador.io/v2
+kind: Mapping
+metadata:
+  name: linkerd-web-mapping
+  namespace: linkerd
+spec:
+  service: linkerd-web:8084
+  host: linkerd.local
+  prefix: /
+  timeout_ms: 4000000
+  idle_timeout_ms: 500000000
+  connect_timeout_ms: 2000000

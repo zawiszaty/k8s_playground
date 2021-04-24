@@ -1,0 +1,57 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: author
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: author-go
+  namespace: author
+spec:
+  selector:
+    matchLabels:
+      run: author-go
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        run: author-go
+    spec:
+      containers:
+      - name: author-go
+        image: zawiszaty/k8s_playground_author:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: author-go
+  namespace: author
+  labels:
+    run: author-go
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  selector:
+    run: author-go
+---
+apiVersion: getambassador.io/v2
+kind: Mapping
+metadata:
+  name: author-go-mapping
+  namespace: author
+spec:
+  service: author-go
+  host: author.local
+  prefix: /
